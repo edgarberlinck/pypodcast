@@ -1,5 +1,6 @@
 import scrapy
 
+
 class QuotesSpider(scrapy.Spider):
     name = "technadu"
 
@@ -14,7 +15,13 @@ class QuotesSpider(scrapy.Spider):
         nodes = response.css('.item-details > .entry-title > a')
         for node in nodes:
             full_url = node.attrib['href']
-            title = node.attrib['title']
-            page_id = full_url.split('/')[-2]
-            # TODO now I have to save-it
-            
+            #title = node.attrib['title']
+            #page_id = full_url.split('/')[-2]
+            yield response.follow(full_url, callback=self.content)
+
+    def content(self, response):
+        print(response)
+        yield {
+            'title': response.css('.entry-title::title').get(),
+            'content': response.css('.td-post-content > p::text').getall()
+        }
